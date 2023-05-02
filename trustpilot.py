@@ -8,7 +8,7 @@ import tqdm
 import torch
 import transformers as trfm
 from more_itertools import chunked_even
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
 
 
@@ -46,6 +46,14 @@ class TrustPilotDataset(Dataset):
 
         print()
 
+    def get_hidden_dim(self) -> int:
+        """Gets the size of each pooled embedding
+
+        Returns:
+            int: size of each pooled embedding
+        """
+        return self.pooled_embs.shape[1]
+
     def __len__(self):
         return len(self.indices)
 
@@ -65,7 +73,7 @@ def parse_profile(profile_json: Dict) -> List[Review]:
         List[Review]: List of reviews with age and gender
     """
     required = ['gender', 'reviews', 'birth_year']
-    if any(key not in profile_json or json[key] is None for key in required):
+    if any(key not in profile_json or profile_json[key] is None for key in required):
         return []
 
     gender = profile_json['gender'].upper()
@@ -168,8 +176,12 @@ def create_embeddings(all_reviews: List[str], emb_path: str, model_type: str, em
                 embeddings = model(**tokenized_text)
 
                 attention_mask = tokenized_text.attention_mask
-                # I think the first
                 token_embeddings = embeddings.hidden_states[emb_layer]
+
+                # TODO: double check that this actually works, it should zero out the mask for the [CLS] and [SEP]
+                special_tokens = [101, 102]  # [CLS], [SEP]
+                for tok_id in special_tokens:
+                    attention_mask[tokenized_text['input_ids'] == tok_id] = 0
 
                 # https://stackoverflow.com/a/73639621
                 input_mask_expanded = attention_mask.unsqueeze(
@@ -195,8 +207,7 @@ def get_dataset(jsonl_path: str,
                 device: torch.device,
                 splits: List[int] = [0.8, 0.1, 0.1],
                 stratify_on_gender: bool = False,
-                stratify_on_age: bool = False
-                ) -> Tuple[TrustPilotDataset, TrustPilotDataset, TrustPilotDataset]:
+                stratify_on_age: bool = False) -> Tuple[TrustPilotDataset, TrustPilotDataset, TrustPilotDataset]:
     """Creates the train, validation, and testing datasets using the TrustPilot data
 
     Args:
