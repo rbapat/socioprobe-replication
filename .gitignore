@@ -8,3 +8,4 @@ output/*
 *.csv
 *.pt
 *.tsv
+.pyc
