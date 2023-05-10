@@ -5,9 +5,6 @@ venv
 .vscode
 output/*
 *.png
-data/authors.csv
-data/paperauths.csv
-data/papers.csv
-data/venue.csv
-data/venue_types.csv
-data/coauthors.csv
+*.csv
+*.pt
+*.tsv
