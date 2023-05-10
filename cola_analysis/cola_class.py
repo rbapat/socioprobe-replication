@@ -15,6 +15,7 @@ class ColaDataset(Dataset):
     pooled_embs: torch.Tensor
     ages: torch.Tensor
     indices: torch.Tensor
+    text: list or pd.Series()
 
     def get_hidden_dim(self) -> int:
         """Gets the size of each pooled embedding
@@ -137,7 +138,7 @@ def get_dataset(data_path: str,
         Tuple[ColaDataset, ColaDataset, ColaDataset]: the training, validation, and testing splits as torch datasets
     """
     data = pd.read_csv(data_path)
-    emb_path = os.path.join(f'{data_path}_embeddings', f'{data_path}_embed{emb_layer}.pt')
+    emb_path = os.path.join(f'{data_path}_embeddings', f'{data_path}_{model_type}_embed{emb_layer}.pt')
     if not os.path.exists(emb_path):
         all_text = data["text"].tolist()
         pooled_embs = create_embeddings(
@@ -160,4 +161,7 @@ def get_dataset(data_path: str,
         indices[_test_idxs], train_size=val_pct, stratify=stratify)
 
     index_splits = (train_idxs, val_idxs, test_idxs)
-    return (ColaDataset(pooled_embs, labels, idxs) for idxs in index_splits)
+
+    # Test for text
+    text = data["text"].tolist()
+    return (ColaDataset(pooled_embs, labels, idxs, text) for idxs in index_splits)

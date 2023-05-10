@@ -66,9 +66,9 @@ def run_epoch(model: torch.nn.Module,
 
     # TODO: Need error analysis! So must return preds and actual labels
     if is_train is True:
-        return running_loss / len(running_preds), metrics.f1_score(running_gt, running_preds, average="binary")
+        return running_loss / len(running_preds), metrics.f1_score(running_gt, running_preds)
     elif is_train is False:
-        return running_loss / len(running_preds), metrics.f1_score(running_gt, running_preds, average="binary"), running_preds, running_gt
+        return running_loss / len(running_preds), metrics.f1_score(running_gt, running_preds), running_preds, running_gt
 
 
 def train_probe(train_set: ColaDataset,
@@ -93,7 +93,7 @@ def train_probe(train_set: ColaDataset,
         batch_size (int, optional): batch size of dataset. Defaults to 32.
         lr_factor (float, optional): Factor to decrease learning rate by if loss doesn't improve. Defaults to 0.5.
         es_patience (int, optional): How many consecutive non-optimal losses can occur before training stops. Defaults to 5.
-        verbost (bool, optional): If true, will print out training info. Defaults to true.
+        verbose (bool, optional): If true, will print out training info. Defaults to true.
     """
 
     model = SimpleProbe(train_set.get_hidden_dim()).to(device)
@@ -130,9 +130,17 @@ def train_probe(train_set: ColaDataset,
 
     test_loss, test_f1, test_preds, test_actual = run_epoch(model, optimizer, loss_function, test_loader, False)
 
-    # Error analysis
-    mismatch_index = [idx for idx, elem in enumerate(test_preds) if elem != test_actual[idx]]
-    # TODO: Return mismatching predictions
+    # TODO: Error analysis
+    # mismatch_index = [idx for idx, elem in enumerate(test_preds) if elem != test_actual[idx]]
+    # count = 0
+    # for text in test_loader:
+    #     print(text)
+    #     count += 1
+    #     if count in mismatch_index:
+    #         print(f"Incorrectly predicted {text}, predicted: {test_preds[count]}, actual: {test_actual[count]}")
+    #     else:
+    #         continue
+
 
     if verbose:
         print(f'Training completed after {epoch} epochs')

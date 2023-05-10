@@ -98,10 +98,10 @@ if __name__ == '__main__':
     verbose = False
 
     # ELECTRA
-    nps_electra_f1_scores_layerall = model_pipeline("google/electra-base-discriminator", "CoLA_clean.csv", verbose=verbose)
-    plot_data(nps_electra_f1_scores_layerall,
+    cola_electra_f1_scores_layerall = model_pipeline("google/electra-base-discriminator", "CoLA_clean.csv", verbose=verbose)
+    plot_data(cola_electra_f1_scores_layerall,
               plot_title="ELECTRA Model Probing Age on CoLA Dataset, all layers",
-              filename="ELECTRA_NPS_layerall.png")
+              filename="ELECTRA_CoLA_layerall.png")
 
     nps_electra_f1_scores_layer1 = model_pipeline("google/electra-base-discriminator", "CoLA_clean.csv", layer=1, verbose=verbose)
     # Error expected for this plot
@@ -111,8 +111,8 @@ if __name__ == '__main__':
     print("Electra has finished")
 
     # RoBERTa - roberta-base
-    nps_roberta_f1_scores = model_pipeline("roberta-base", "CoLA_clean.csv", verbose=verbose)
-    plot_data(nps_roberta_f1_scores,
+    cola_roberta_f1_scores = model_pipeline("roberta-base", "CoLA_clean.csv", verbose=verbose)
+    plot_data(cola_roberta_f1_scores,
               plot_title="RoBERTa-Base Model Probing Age on CoLA Dataset, all layers",
-              filename="BERT_NPS_layerall.png")
+              filename="RoBERT_CoLA_layerall.png")
     print("RoBERTa has finished")

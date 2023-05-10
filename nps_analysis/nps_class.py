@@ -143,7 +143,7 @@ def get_dataset(data_path: str,
         Tuple[NPSChatCorpus, NPSChatCorpus, NPSChatCorpus]: the training, validation, and testing splits as torch datasets
     """
     data = pd.read_csv(data_path)
-    emb_path = os.path.join(f'{data_path}_embeddings', f'{data_path}_embed{emb_layer}.pt')
+    emb_path = os.path.join(f'{data_path}_embeddings', f'{data_path}_{model_type}_embed{emb_layer}.pt')
     if not os.path.exists(emb_path):
         all_text = data["text"].tolist()
         pooled_embs = create_embeddings(
