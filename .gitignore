@@ -9,3 +9,4 @@ output/*
 *.pt
 *.tsv
 *.pyc
+*__pycache__*
