@@ -95,14 +95,15 @@ def model_pipeline(model: str, filename: str, layer: int = None, verbose: bool =
 
 
 if __name__ == '__main__':
+    verbose = False
 
     # ELECTRA
-    nps_electra_f1_scores_layerall = model_pipeline("google/electra-base-discriminator", "nps_chat_corpus_clean.csv", verbose=True)
+    nps_electra_f1_scores_layerall = model_pipeline("google/electra-base-discriminator", "nps_chat_corpus_clean.csv", verbose=verbose)
     plot_data(nps_electra_f1_scores_layerall,
               plot_title="ELECTRA Model Probing Age on NPS Chat Corpus",
               filename="ELECTRA_NPS_layerall.png")
 
-    nps_electra_f1_scores_layer1 = model_pipeline("google/electra-base-discriminator", "nps_chat_corpus_clean.csv", layer=1, verbose=True)
+    nps_electra_f1_scores_layer1 = model_pipeline("google/electra-base-discriminator", "nps_chat_corpus_clean.csv", layer=1, verbose=verbose)
     # Error expected for this plot
     # plot_data(nps_electra_f1_scores_layer1,
     #           plot_title="ELECTRA probing Age on NPS Chat Corpus, Layer 1",
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     print("Electra has finished")
 
     # RoBERTa - roberta-base
-    nps_roberta_f1_scores = model_pipeline("roberta-base", "nps_chat_corpus_clean.csv", verbose=True)
+    nps_roberta_f1_scores = model_pipeline("roberta-base", "nps_chat_corpus_clean.csv", verbose=verbose)
     plot_data(nps_roberta_f1_scores,
               plot_title="RoBERTa-Base Model Probing Age on NPS Chat Corpus, all layers",
               filename="BERT_NPS_layerall.png")
