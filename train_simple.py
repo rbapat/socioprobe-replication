@@ -34,12 +34,12 @@ def run_epoch(
     running_loss = 0
     running_preds, running_gt = [], []
 
+    orig_dataset = dataloader.dataset
+
     model.train(is_train)
-    for embeds, ground_truth in dataloader:
+    for embeds, ground_truth, sampled_idxs in dataloader:
         optimizer.zero_grad()
         raw_output = model(embeds)
-
-        # I wonder how much slower this if-statement makes the training
 
         loss = loss_function(raw_output, ground_truth)
         if is_train:
@@ -50,6 +50,13 @@ def run_epoch(
         for pred, actual in zip(preds, ground_truth):
             running_preds.append(pred.item())
             running_gt.append(actual.item())
+
+        if not is_train:
+            for batch_idx in torch.where(preds != ground_truth)[0]:
+                text = orig_dataset.orig_strings[sampled_idxs[batch_idx]]
+                print(
+                    f"Predicted {preds[batch_idx].item()} when it should be {ground_truth[batch_idx].item()} for the following text: {text}"
+                )
 
         running_loss += loss.item() * embeds.shape[0]
 

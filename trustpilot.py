@@ -21,6 +21,8 @@ class Review:
 class ProbingDataset(Dataset):
     pooled_embeddings: torch.Tensor
     ground_truth: torch.Tensor
+    indices: torch.Tensor
+    orig_strings: List[str]
 
     def get_hidden_dim(self) -> int:
         """Gets the size of each pooled embedding
@@ -34,7 +36,7 @@ class ProbingDataset(Dataset):
         return len(self.pooled_embeddings)
 
     def __getitem__(self, idx):
-        return self.pooled_embeddings[idx], self.ground_truth[idx]
+        return (self.pooled_embeddings[idx], self.ground_truth[idx], self.indices[idx])
 
 
 def parse_profile(profile_json: Dict) -> List[Review]:
@@ -214,6 +216,7 @@ def get_dataset(
     assert not use_age or not use_gender
 
     reviews = load_reviews(jsonl_path)
+
     if use_age:
         ground_truth = torch.tensor(
             [rev.age for rev in reviews], device=device, dtype=torch.long
@@ -234,4 +237,6 @@ def get_dataset(
     else:
         pooled_embeddings = torch.load(emb_path).to(device)
 
-    return ProbingDataset(pooled_embeddings, ground_truth)
+    orig_strings = [rev.review_text for rev in reviews]
+    indices = torch.tensor(range(len(orig_strings)), dtype=torch.long, device=device)
+    return ProbingDataset(pooled_embeddings, ground_truth, indices, orig_strings)
