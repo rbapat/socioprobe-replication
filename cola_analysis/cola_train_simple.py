@@ -7,7 +7,7 @@ import torch.nn.functional as F
 import sklearn.metrics as metrics
 from torch.utils.data import DataLoader
 
-from cola_class import ColaDataset
+from cola_class import ColaDataset, decode_embed
 
 
 class SimpleProbe(torch.nn.Module):
@@ -15,11 +15,11 @@ class SimpleProbe(torch.nn.Module):
         super(SimpleProbe, self).__init__()
 
         self.model = nn.Sequential(
-            nn.Linear(in_dim, 128),
+            nn.Linear(in_dim, 100),
             nn.ReLU(),
-            nn.Linear(128, 128),
+            nn.Linear(100, 100),
             nn.ReLU(),
-            nn.Linear(128, 2)  # Change based on number of classes
+            nn.Linear(100, 2)  # Change based on number of classes
         )
 
     def forward(self, x):
@@ -79,7 +79,8 @@ def train_probe(train_set: ColaDataset,
                 batch_size: int = 32,
                 lr_factor: float = 0.5,
                 es_patience: int = 5,
-                verbose=True):
+                verbose=True,
+                llm_name="roberta-base"):
     """Trains a simple probe to predict labels from the dataset
 
     Args:
@@ -131,16 +132,18 @@ def train_probe(train_set: ColaDataset,
     test_loss, test_f1, test_preds, test_actual = run_epoch(model, optimizer, loss_function, test_loader, False)
 
     # TODO: Error analysis
-    # mismatch_index = [idx for idx, elem in enumerate(test_preds) if elem != test_actual[idx]]
-    # count = 0
-    # for text in test_loader:
-    #     print(text)
-    #     count += 1
-    #     if count in mismatch_index:
-    #         print(f"Incorrectly predicted {text}, predicted: {test_preds[count]}, actual: {test_actual[count]}")
-    #     else:
-    #         continue
-
+    mismatch_index = [idx for idx, elem in enumerate(test_preds) if elem != test_actual[idx]]
+    count = 0
+    for text in test_loader:
+        for val in text:
+            print(val)
+            decoded_val = decode_embed(val, llm_name, device)
+            print(decoded_val)
+        count += 1
+        if count in mismatch_index:
+            print(f"Incorrectly predicted {text}, predicted: {test_preds[count]}, actual: {test_actual[count]}")
+        else:
+            continue
 
     if verbose:
         print(f'Training completed after {epoch} epochs')

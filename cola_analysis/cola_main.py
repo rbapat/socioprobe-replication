@@ -68,7 +68,6 @@ def plot_data(test_f1_scores: np.ndarray, plot_title: str, filename="Blah.png"):
 
 
 def model_pipeline(model: str, filename: str, layer: int = None, verbose: bool = False):
-    set_seed(0)
 
     data_file = os.path.join('data', filename)
     model_type = model
@@ -76,20 +75,22 @@ def model_pipeline(model: str, filename: str, layer: int = None, verbose: bool =
 
     test_f1_scores = np.zeros((5, 12)) if layer is None else np.zeros(5)
     for rep in range(5):  # Loop used to initiate probe at different seeds
+        set_seed(rep)
+
         if layer is None:
             for emb_layer in range(1, 13):
                 train, val, test = cola_class.get_dataset(
                     data_file, model_type, emb_layer, device)
 
                 f1 = simple.train_probe(
-                    train, val, test, device, True, verbose=verbose)
+                    train, val, test, device, True, verbose=verbose, llm_name==model)
                 test_f1_scores[rep, emb_layer - 1] = f1
         else:
             train, val, test = cola_class.get_dataset(
                 data_file, model_type, layer, device)
 
             f1 = simple.train_probe(
-                train, val, test, device, True, verbose=verbose)
+                train, val, test, device, True, verbose=verbose, model=model)
             test_f1_scores[rep] = f1
     return np.flip(test_f1_scores, axis=-1)  # Need to flip because final embedding is 1!
 

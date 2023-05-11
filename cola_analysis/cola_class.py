@@ -138,6 +138,7 @@ def get_dataset(data_path: str,
         Tuple[ColaDataset, ColaDataset, ColaDataset]: the training, validation, and testing splits as torch datasets
     """
     data = pd.read_csv(data_path)
+    data.sample(frac=1, random_state=5)
     emb_path = os.path.join(f'{data_path}_embeddings', f'{data_path}_{model_type}_embed{emb_layer}.pt')
     if not os.path.exists(emb_path):
         all_text = data["text"].tolist()
@@ -165,3 +166,29 @@ def get_dataset(data_path: str,
     # Test for text
     text = data["text"].tolist()
     return (ColaDataset(pooled_embs, labels, idxs, text) for idxs in index_splits)
+
+
+def decode_embed(embed: torch.tensor, model_type: str, device: torch.device):
+    """Given a tensor, decode the embedding into a string
+    This uses the embedding of the first layer, which is saved
+
+    Parameters
+    ----------
+    embed : torch.tensor
+        embedding of phrase
+    model_type : str
+        Huggingface model used
+    device : torch.device
+        what torch device (cuda or cpu) are we using
+
+    Returns
+    ----------
+    TODO:
+    """
+    tokenizer, model, config = get_model(model_type, device)
+
+    with torch.no_grad():
+        model.eval()
+        text = tokenizer.batch_decode(embed)
+
+    return text
