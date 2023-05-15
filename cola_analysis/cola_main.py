@@ -1,5 +1,6 @@
 import os
 import random
+from datetime import datetime
 
 import torch
 import numpy as np
@@ -7,7 +8,8 @@ import transformers
 import matplotlib.pyplot as plt
 
 import cola_class
-import cola_train_simple as simple
+import train_simple as simple
+import train_mdl as mdl
 
 
 def set_seed(val: int):
@@ -45,27 +47,6 @@ def plot_data(test_f1_scores: np.ndarray, plot_title: str, filename="Blah.png"):
     plt.savefig(filename)
     plt.show()
 
-# # Rohan's Code!
-# def main():
-#     set_seed(0)
-
-#     data_file = os.path.join(
-#         'data', 'nps_chat_corpus_clean.csv')
-#     model_type = 'google/electra-base-discriminator'
-#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-#     test_f1_scores = np.zeros((5, 12))
-#     for rep in range(5):
-#         for emb_layer in range(1, 13):
-#             train, val, test = nps_class.get_dataset(
-#                 data_file, model_type, emb_layer, device)
-
-#             f1 = simple.train_probe(
-#                 train, val, test, device, True, verbose=False)
-#             test_f1_scores[rep, emb_layer - 1] = f1
-
-#     plot_data(test_f1_scores)
-
 
 def model_pipeline(model: str, filename: str, layer: int = None, verbose: bool = False):
 
@@ -83,7 +64,7 @@ def model_pipeline(model: str, filename: str, layer: int = None, verbose: bool =
                     data_file, model_type, emb_layer, device)
 
                 f1 = simple.train_probe(
-                    train, val, test, device, True, verbose=verbose, llm_name==model)
+                    train, val, test, device, True, verbose=verbose, llm_name=model)
                 test_f1_scores[rep, emb_layer - 1] = f1
         else:
             train, val, test = cola_class.get_dataset(

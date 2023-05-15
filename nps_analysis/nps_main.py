@@ -91,7 +91,7 @@ def model_pipeline(model: str, filename: str, layer: int = None, verbose: bool =
             f1 = simple.train_probe(
                 train, val, test, device, True, verbose=verbose)
             test_f1_scores[rep] = f1
-    return np.flip(test_f1_scores, axis=-1)  # Need to flip because final embedding is 1!
+    return test_f1_scores
 
 
 if __name__ == '__main__':

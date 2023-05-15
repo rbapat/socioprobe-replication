@@ -11,11 +11,11 @@ import pandas as pd
 
 
 @dataclass
-class ColaDataset(Dataset):
+class ProbingDataset(Dataset):
     pooled_embs: torch.Tensor
     ages: torch.Tensor
     indices: torch.Tensor
-    text: list or pd.Series()
+    orig_strings: List[str]
 
     def get_hidden_dim(self) -> int:
         """Gets the size of each pooled embedding
@@ -29,9 +29,7 @@ class ColaDataset(Dataset):
         return len(self.indices)
 
     def __getitem__(self, idx):
-        idx = self.indices[idx]
-
-        return self.pooled_embs[idx], self.ages[idx]
+        return (self.pooled_embeddings[idx], self.ground_truth[idx], self.indices[idx])
 
 
 def get_model(model_type: str, device: torch.device) -> Tuple[trfm.PreTrainedTokenizer, trfm.PreTrainedModel, trfm.PretrainedConfig]:
@@ -90,7 +88,13 @@ def create_embeddings(text: List[str], emb_path: str, model_type: str, emb_layer
                 batch = text[start:end]
 
                 tokenized_text = tokenizer(
-                    batch, return_tensors='pt', return_attention_mask=True, padding=True, truncation=True, max_length=config.max_position_embeddings).to(device)
+                    batch,
+                    return_tensors='pt',
+                    return_attention_mask=True,
+                    padding=True,
+                    truncation=True,
+                    max_length=config.max_position_embeddings
+                ).to(device)
 
                 embeddings = model(**tokenized_text)
 
@@ -103,8 +107,9 @@ def create_embeddings(text: List[str], emb_path: str, model_type: str, emb_layer
                     attention_mask[tokenized_text['input_ids'] == tok_id] = 0
 
                 # https://stackoverflow.com/a/73639621
-                input_mask_expanded = attention_mask.unsqueeze(
-                    -1).expand(token_embeddings.size()).float()
+                input_mask_expanded = (
+                    attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+                )
                 sum_embeddings = torch.sum(
                     token_embeddings * input_mask_expanded, 1)
                 sum_mask = input_mask_expanded.sum(1)
@@ -124,7 +129,7 @@ def get_dataset(data_path: str,
                 model_type: str,
                 emb_layer: int,
                 device: torch.device,
-                splits: List[int] = [0.8, 0.1, 0.1]) -> Tuple[ColaDataset, ColaDataset, ColaDataset]:
+                splits: List[int] = [0.8, 0.1, 0.1]) -> Tuple[ProbingDataset, ProbingDataset, ProbingDataset]:
     """Creates the train, validation, and testing datasets using the ColaDataset data
 
     Args:
@@ -138,7 +143,7 @@ def get_dataset(data_path: str,
         Tuple[ColaDataset, ColaDataset, ColaDataset]: the training, validation, and testing splits as torch datasets
     """
     data = pd.read_csv(data_path)
-    data.sample(frac=1, random_state=5)
+    data = data.sample(frac=1, random_state=5)
     emb_path = os.path.join(f'{data_path}_embeddings', f'{data_path}_{model_type}_embed{emb_layer}.pt')
     if not os.path.exists(emb_path):
         all_text = data["text"].tolist()
@@ -165,7 +170,8 @@ def get_dataset(data_path: str,
 
     # Test for text
     text = data["text"].tolist()
-    return (ColaDataset(pooled_embs, labels, idxs, text) for idxs in index_splits)
+    indices = torch.tensor(range(len(text)), dtype=torch.long, device=device)
+    return (ProbingDataset(pooled_embs, labels, idxs, text) for idxs in index_splits)
 
 
 def decode_embed(embed: torch.tensor, model_type: str, device: torch.device):
