@@ -4,6 +4,7 @@ from datetime import datetime
 
 import torch
 import numpy as np
+import pandas as pd
 import transformers
 import matplotlib.pyplot as plt
 
@@ -218,7 +219,6 @@ if __name__ == "__main__":
     nps_robertabase_f1_scores_layer0 = model_pipeline(model_type, data_location, verbose=verbose, layer=0)
 
     # Combine all data together
-    data_name = "cola"
     final_df = pd.concat([format_scores(nps_electra_f1_scores_layerall, data_name, "ELECTRA"),
                           format_scores(nps_electra_f1_scores_layer0, data_name, "ELECTRA", layer=0),
                           format_scores(nps_robertabase_f1_scores_layerall, data_name, "RoBERTa-base"),
