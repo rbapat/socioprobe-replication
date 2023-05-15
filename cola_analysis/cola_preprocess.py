@@ -22,7 +22,7 @@ def main():
 
     # Merge dfs and save
     final_df = pd.concat([train_df, test_df]).filter(["label", "text", "test_index"])
-    final_df.to_csv("data/CoLA_clean.csv", index=False)
+    final_df.to_csv("data/cola_clean.csv", index=False)
 
     df = final_df
 

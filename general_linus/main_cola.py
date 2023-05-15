@@ -168,7 +168,7 @@ if __name__ == "__main__":
     # ELECTRA
     # All ELECTRA layers
     model_type = "google/electra-base-discriminator"
-    data_location = "CoLA_clean.csv"
+    data_location = "cola_clean.csv"
     cola_electra_f1_scores_layerall = model_pipeline(model_type, data_location, verbose=verbose)
 
     model_type = model_type.replace("/", "-")
