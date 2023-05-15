@@ -24,7 +24,7 @@ def set_seed(val: int):
     np.random.seed(val)
 
 
-def plot_data(test_scores: np.ndarray, name: str):
+def plot_data(test_scores: np.ndarray, model_type: str, name: str):
     """Plots the f1 or MDL scores given an array of shape `(num_reps, 12)`
 
     Args:
@@ -35,7 +35,7 @@ def plot_data(test_scores: np.ndarray, name: str):
     min_data = np.amin(test_scores, axis=0)
     x_coords = list(range(len(mean_data)))
 
-    plt.title("bert-base-uncased probing age on TrustPilot")
+    plt.title(f"{model_type} probing age on TrustPilot")
     plt.xlabel("Layer number")
     plt.ylabel(f"Test {name} Score")
 
@@ -47,16 +47,18 @@ def plot_data(test_scores: np.ndarray, name: str):
 def main():
     set_seed(0)
 
+    model_type = "microsoft/deberta-base"  # "bert-base-uncased"
     data_file = os.path.join("data", "united_states.auto-adjusted_gender.jsonl")
-    model_type = "bert-base-uncased"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    num_hidden = 12
+    verbose = False
 
     print(f"Generating F1 and MDL plots for {model_type} on {data_file}...")
-    test_scores = np.zeros((2, 5, 12))
+    test_scores = np.zeros((2, 5, num_hidden))
     for rep in range(5):
-        for emb_layer in range(1, 13):
+        for emb_layer in range(1, num_hidden + 1):
             print(
-                f"[{datetime.now().strftime('%H:%M:%S')}] Repetition {rep+1}/5, Layer {emb_layer}/12"
+                f"[{datetime.now().strftime('%H:%M:%S')}] Repetition {rep+1}/5, Layer {emb_layer}/{num_hidden}"
             )
 
             dataset = trustpilot.get_dataset(
@@ -75,17 +77,18 @@ def main():
                 test,
                 dataset.get_hidden_dim(),
                 device,
-                verbose=False,
+                verbose=verbose,
             )
-            mdl_score = mdl.train_probe(dataset, device, verbose=False)
+            mdl_score = mdl.train_probe(dataset, device, verbose=verbose)
 
             test_scores[0, rep, emb_layer - 1] = test_f1
             test_scores[1, rep, emb_layer - 1] = mdl_score
 
+    model_type = model_type.replace("/", "-")
     os.makedirs("figures", exist_ok=True)
     for idx, score_type in enumerate(("F1", "MDL")):
         path = os.path.join("figures", f"{model_type}_{score_type}.png")
-        plot_data(test_scores[idx], "MDL")
+        plot_data(test_scores[idx], model_type, score_type)
         plt.savefig(path)
         plt.figure()
         print(f"Saved {path}")
