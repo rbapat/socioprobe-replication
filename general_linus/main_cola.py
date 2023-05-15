@@ -244,7 +244,7 @@ if __name__ == "__main__":
                           format_scores(cola_electra_f1_scores_layer0, data_name, "ELECTRA", layer=0),
                           format_scores(cola_robertabase_f1_scores_layerall, data_name, "RoBERTa-base"),
                           format_scores(cola_robertabase_f1_scores_layer0, data_name, "RoBERTa-base", layer=0),
-                          format_scores(cola_debertabase_f1_scores_layerall, data_name, "DeBERTa-base", layer=0),
+                          format_scores(cola_debertabase_f1_scores_layerall, data_name, "DeBERTa-base"),
                           format_scores(cola_debertabase_f1_scores_layer0, data_name, "DeBERTa-base", layer=0)],
                          ignore_index=True)
 
