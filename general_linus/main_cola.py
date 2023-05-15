@@ -178,12 +178,12 @@ def format_scores(input_data: np.ndarray, data_name: str, model: str, layer: int
 if __name__ == "__main__":
     # VARIABLES
     verbose = True
+    data_location = "cola_clean.csv"
+    data_name = "CoLA"
 
     # ELECTRA
     # All ELECTRA layers
     model_type = "google/electra-base-discriminator"
-    data_location = "cola_clean.csv"
-    data_name = "CoLA"
     cola_electra_f1_scores_layerall = model_pipeline(model_type, data_location, verbose=verbose)
 
     model_type = model_type.replace("/", "-")
@@ -219,12 +219,33 @@ if __name__ == "__main__":
     cola_robertabase_f1_scores_layer0 = model_pipeline(model_type, data_location, verbose=verbose,
                                                        layer=0)
 
+
+    # DeBERTa-base
+    model_type = "microsoft/deberta-base"
+    cola_debertabase_f1_scores_layerall = model_pipeline(model_type, data_location, verbose=verbose)
+
+    model_type = model_type.replace("/", "-")
+    os.makedirs("figures", exist_ok=True)
+    for idx, score_type in enumerate(("F1", "MDL")):
+        path = os.path.join("figures", f"{model_type}_{score_type}.png")
+        plot_data(cola_robertabase_f1_scores_layerall[idx], "DeBERTa-base", score_type, "Acceptability", data_name)
+        plt.savefig(path)
+        plt.figure()
+        print(f"Saved {path}")
+
+    # Output layer (layer 0)
+    model_type = "microsoft/deberta-base"
+    cola_debertabase_f1_scores_layer0 = model_pipeline(model_type, data_location, verbose=verbose,
+                                                       layer=0)
+
     # Combine all data together
     data_name = "cola"
     final_df = pd.concat([format_scores(cola_electra_f1_scores_layerall, data_name, "ELECTRA"),
                           format_scores(cola_electra_f1_scores_layer0, data_name, "ELECTRA", layer=0),
                           format_scores(cola_robertabase_f1_scores_layerall, data_name, "RoBERTa-base"),
-                          format_scores(cola_robertabase_f1_scores_layer0, data_name, "RoBERTa-base", layer=0)],
+                          format_scores(cola_robertabase_f1_scores_layer0, data_name, "RoBERTa-base", layer=0),
+                          format_scores(cola_debertabase_f1_scores_layerall, data_name, "DeBERTa-base", layer=0),
+                          format_scores(cola_debertabase_f1_scores_layer0, data_name, "DeBERTa-base", layer=0)],
                          ignore_index=True)
 
     # Save scores

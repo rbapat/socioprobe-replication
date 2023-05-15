@@ -178,12 +178,12 @@ def format_scores(input_data: np.ndarray, data_name: str, model: str, layer: int
 if __name__ == "__main__":
     # VARIABLES
     verbose = True
+    data_location = "nps_chat_corpus_clean.csv"
+    data_name = "NPS"
 
     # ELECTRA
     # All ELECTRA layers
     model_type = "google/electra-base-discriminator"
-    data_location = "nps_chat_corpus_clean.csv"
-    data_name = "NPS"
     nps_electra_f1_scores_layerall = model_pipeline(model_type, data_location, verbose=verbose)
 
     model_type = model_type.replace("/", "-")
@@ -216,13 +216,34 @@ if __name__ == "__main__":
 
     # Output layer (layer 0)
     model_type = "roberta-base"
-    nps_robertabase_f1_scores_layer0 = model_pipeline(model_type, data_location, verbose=verbose, layer=0)
+    nps_robertabase_f1_scores_layer0 = model_pipeline(model_type, data_location, verbose=verbose, layer=12)
+
+
+    # DeBERTa-base
+    model_type = "microsoft/deberta-base"
+    nps_debertabase_f1_scores_layerall = model_pipeline(model_type, data_location, verbose=verbose)
+
+    model_type = model_type.replace("/", "-")
+    os.makedirs("figures", exist_ok=True)
+    for idx, score_type in enumerate(("F1", "MDL")):
+        path = os.path.join("figures", f"{model_type}_{score_type}.png")
+        plot_data(nps_robertabase_f1_scores_layerall[idx], "DeBERTa-base", score_type, "Age", data_name)
+        plt.savefig(path)
+        plt.figure()
+        print(f"Saved {path}")
+
+    # Output layer (layer 0)
+    model_type = "microsoft/deberta-base"
+    nps_debertabase_f1_scores_layer0 = model_pipeline(model_type, data_location, verbose=verbose, layer=12)
+
 
     # Combine all data together
     final_df = pd.concat([format_scores(nps_electra_f1_scores_layerall, data_name, "ELECTRA"),
                           format_scores(nps_electra_f1_scores_layer0, data_name, "ELECTRA", layer=0),
                           format_scores(nps_robertabase_f1_scores_layerall, data_name, "RoBERTa-base"),
-                          format_scores(nps_robertabase_f1_scores_layer0, data_name, "RoBERTa-base", layer=0)],
+                          format_scores(nps_robertabase_f1_scores_layer0, data_name, "RoBERTa-base", layer=0),
+                          format_scores(nps_debertabase_f1_scores_layerall, data_name, "DeBERTa-base"),
+                          format_scores(nps_debertabase_f1_scores_layer0, data_name, "DeBERTa-base", layer=0)],
                          ignore_index=True)
 
     # Save scores
