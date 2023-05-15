@@ -52,12 +52,12 @@ def parse_profile(profile_json: Dict) -> List[Review]:
     if any(key not in profile_json or profile_json[key] is None for key in required):
         return []
 
-    gender = profile_json["gender"].upper()
-    if gender not in "MF":
+    gender_str = profile_json["gender"].upper()
+    if gender_str not in "MF":
         return []
 
     reviews = []
-    gender = 0 if gender == "M" else 1
+    gender = 0 if gender_str == "M" else 1
     birth_year = int(profile_json["birth_year"])
     for review in profile_json["reviews"]:
         review_text = "\n".join(review["text"])
@@ -66,7 +66,13 @@ def parse_profile(profile_json: Dict) -> List[Review]:
         if age < 16 or age > 70:
             continue
 
-        is_old = 0 if age < 35 else 1
+        if age < 35:
+            is_old = 0
+        elif age > 45:
+            is_old = 1
+        else:
+            continue
+
         reviews.append(Review(gender, is_old, review_text))
 
     return reviews
@@ -134,10 +140,12 @@ def create_embeddings(
         torch.Tensor: tensor of shape `(num_samples, hidden_size)` where num_samples is the number of reviews in `all_reviews`
     """
     tokenizer, model, config = get_model(model_type, device)
-
     # emb_layer == 0: output embedding of model
     # emb_layer \in [1, 12]: output of nth hidden layer
     assert emb_layer >= 0 and emb_layer <= config.num_hidden_layers
+    print(
+        f"Creating embeddings for {len(all_reviews)} reviews, embedding layer {emb_layer}"
+    )
 
     num_reviews = len(all_reviews)
     pooled_embs = torch.zeros(num_reviews, config.hidden_size, device=device)
@@ -228,7 +236,9 @@ def get_dataset(
     else:
         raise RuntimeError("use_age and use_gender were both false")
 
-    emb_path = os.path.join(f"{jsonl_path}_embeddings", f"{emb_layer}.pt")
+    emb_path = os.path.join(
+        "embeddings", model_type, os.path.basename(jsonl_path), f"{emb_layer}.pt"
+    )
     if not os.path.exists(emb_path):
         all_text = [rev.review_text for rev in reviews]
         pooled_embeddings = create_embeddings(

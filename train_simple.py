@@ -51,12 +51,12 @@ def run_epoch(
             running_preds.append(pred.item())
             running_gt.append(actual.item())
 
-        if not is_train:
-            for batch_idx in torch.where(preds != ground_truth)[0]:
-                text = orig_dataset.orig_strings[sampled_idxs[batch_idx]]
-                print(
-                    f"Predicted {preds[batch_idx].item()} when it should be {ground_truth[batch_idx].item()} for the following text: {text}"
-                )
+        # if not is_train:
+        #     for batch_idx in torch.where(preds != ground_truth)[0]:
+        #         text = orig_dataset.orig_strings[sampled_idxs[batch_idx]]
+        #         print(
+        #             f"Predicted {preds[batch_idx].item()} when it should be {ground_truth[batch_idx].item()} for the following text: {text}"
+        #         )
 
         running_loss += loss.item() * embeds.shape[0]
 
