@@ -175,12 +175,13 @@ if __name__ == "__main__":
     os.makedirs("figures", exist_ok=True)
     for idx, score_type in enumerate(("F1", "MDL")):
         path = os.path.join("figures", f"{model_type}_{score_type}.png")
-        plot_data(nps_electra_f1_scores_layerall[idx], "MDL")
+        plot_data(nps_electra_f1_scores_layerall[idx], "ELECTRA", score_type, "Acceptability", "CoLA")
         plt.savefig(path)
         plt.figure()
         print(f"Saved {path}")
 
     # Output layer (layer 0)
+    model_type = "google/electra-base-discriminator"
     nps_electra_f1_scores_layer0 = model_pipeline(model_type, data_location, verbose=verbose,
                                                   layer=0)
 
@@ -193,12 +194,13 @@ if __name__ == "__main__":
     os.makedirs("figures", exist_ok=True)
     for idx, score_type in enumerate(("F1", "MDL")):
         path = os.path.join("figures", f"{model_type}_{score_type}.png")
-        plot_data(nps_robertabase_f1_scores_layerall[idx], "MDL")
+        plot_data(nps_robertabase_f1_scores_layerall[idx], "RoBERTa-base", score_type, "Acceptability", "CoLA")
         plt.savefig(path)
         plt.figure()
         print(f"Saved {path}")
 
     # Output layer (layer 0)
+    model_type = "roberta-base"
     nps_robertabase_f1_scores_layer0 = model_pipeline(model_type,
                                                       data_location,
                                                       verbose=verbose,
