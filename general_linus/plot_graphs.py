@@ -213,7 +213,6 @@ def plot_all_layers(dataset: pd.DataFrame, data_name: str, metric: str):
     path = os.path.join("figures", f"RQ2_{data_name}_{metric}.png")
     fig.write_image(path)
     fig.show()
-    fig.show()
 
 
 if __name__ == "__main__":
