@@ -173,6 +173,7 @@ def plot_all_layers(dataset: pd.DataFrame, data_name: str, metric: str):
             showlegend=False,
             opacity=0.2
         ),
+
         # Graph lines
         go.Scatter(
             name="DeBERTa-base",
@@ -202,10 +203,16 @@ def plot_all_layers(dataset: pd.DataFrame, data_name: str, metric: str):
     fig.update_xaxes(title="Layer")
     fig.update_yaxes(title=f"Test {metric} score")
     fig.update_layout(legend=dict(yanchor="top",
-                                  xanchor="right",
-                                  bgcolor='rgba(0,0,0,0)'
+                                  x=0.75,
+                                  bgcolor='rgba(169, 163, 172, 0.3)'
                                   ),
                       legend_title="Model")
+
+    # Save and show model
+    os.makedirs("figures", exist_ok=True)
+    path = os.path.join("figures", f"RQ2_{data_name}_{metric}.png")
+    fig.write_image(path)
+    fig.show()
     fig.show()
 
 
