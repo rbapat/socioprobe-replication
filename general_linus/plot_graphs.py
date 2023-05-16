@@ -48,11 +48,12 @@ def plot_final_layer(dataset: pd.DataFrame, metric: str, layer: int = 12):
         y=final_embed.loc[final_embed["model"] == "DeBERTa-base", "mean"],
         name="DeBERTa-base",
         marker_color='purple',
-        error_y=dict(type='data', array=final_embed.loc[final_embed["model"] == "RoBERTa-base", "std_dev"])
+        error_y=dict(type='data', array=final_embed.loc[final_embed["model"] == "DeBERTa-base", "std_dev"])
     ))
 
     # Customization
     fig.update_layout(legend=dict(yanchor="top",
+                                  y=0.35,
                                   xanchor="right"
                                   ),
                       legend_title="Model")
@@ -203,7 +204,8 @@ def plot_all_layers(dataset: pd.DataFrame, data_name: str, metric: str):
     fig.update_xaxes(title="Layer")
     fig.update_yaxes(title=f"Test {metric} score")
     fig.update_layout(legend=dict(yanchor="top",
-                                  x=0.75,
+                                  xanchor="right",
+                                  x=0.99,
                                   bgcolor='rgba(169, 163, 172, 0.3)'
                                   ),
                       legend_title="Model")
@@ -219,10 +221,14 @@ if __name__ == "__main__":
     # VARIABLES - TODO: Add datasets here
     cola_scores = pd.read_csv("scores/cola_scores.csv", index_col=0)
     nps_scores = pd.read_csv("scores/NPS_scores.csv", index_col=0)
+    mdgender_scores = pd.read_csv("scores/mdgender_scores.csv", index_col=0)
+    joc_electra_scores = pd.read_csv("scores/google_electra-base-discriminator_results.csv", index_col=0)
+    joc_deberta_scores = pd.read_csv("scores/microsoft_deberta-base_results.csv", index_col=0)
 
     # Join dfs and find means and averages for each row
     # TODO: UPDATE LIST
-    df_joined = pd.concat([cola_scores, nps_scores], ignore_index=True)
+    df_joined = pd.concat([cola_scores, nps_scores, mdgender_scores, joc_electra_scores,
+                           joc_deberta_scores], ignore_index=True)
     df_joined["mean"] = df_joined[["run1", "run2", "run3", "run4", "run5"]].mean(axis=1)
     df_joined["std_dev"] = df_joined[["run1", "run2", "run3", "run4", "run5"]].std(axis=1)
 
