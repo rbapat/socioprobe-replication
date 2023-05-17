@@ -171,6 +171,12 @@ def get_dataset(
         ground_truth = torch.tensor(data["label"].replace({10: 0, 20: 1, 30: 2, 40: 3}).tolist(), device=device)
     elif "cola" in data_path:
         ground_truth = torch.tensor(data["label"].tolist(), device=device)
+    elif "reddit" in data_path:
+        ground_truth = torch.tensor(data["label"].tolist(), device=device)
+    elif "fitocracy" in data_path:
+        ground_truth = torch.tensor(data["label"].tolist(), device=device)
+    elif "facebook" in data_path:
+        ground_truth = torch.tensor(data["label"].tolist(), device=device)
     else:
         raise Exception("Dataset does not seem to be for NPS or for CoLA. Please use the correct code to get the right results.")
 

@@ -10,3 +10,4 @@ output/*
 *.tsv
 *.pyc
 *__pycache__*
+cs_685_venv/*
