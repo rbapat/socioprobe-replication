@@ -61,6 +61,9 @@ def plot_final_layer(dataset: pd.DataFrame, metric: str, layer: int = 12):
 
     # Here we modify the tickangle of the xaxis, resulting in rotated labels.
     fig.update_layout(barmode='group', xaxis_tickangle=-45)
+    fig.update_xaxes(tickfont={"size": 16})
+    fig.update_yaxes(tickfont={"size": 16},
+                     titlefont={"size": 16})
 
     # Save figures
     os.makedirs("figures", exist_ok=True)
@@ -201,8 +204,10 @@ def plot_all_layers(dataset: pd.DataFrame, data_name: str, metric: str):
 
     # Add customizations
     fig.update_layout(title=f"Layer-wise {metric} Scores for {data_name}")
-    fig.update_xaxes(title="Layer")
-    fig.update_yaxes(title=f"Test {metric} score")
+    fig.update_xaxes(title="Layer",
+                     titlefont={"size": 16},
+                     tickfont={"size": 16})
+    fig.update_yaxes(tickfont={"size": 16})
     fig.update_layout(legend=dict(yanchor="top",
                                   xanchor="right",
                                   x=0.99,
