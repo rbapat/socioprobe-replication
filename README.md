@@ -15,6 +15,21 @@ Group: Rohan Bapat, Fareya Ikram, Linus Jen & Jocelyn Lutes
 3. Evaluate Test F1 score and Test MDL score for each dataset
 4. Plot the results 
 
+### Relevant Files
+The code to replicate the `NPS`, `CoLA` and `rtGender` datasets can be found in the `general_linus` directory. The code to replicate `mdgender` and `trustpilot` can be found in the directories containing the dataname. (The relevant files all perform the same functions but were kept separate to avoid merge conflicts.)
+
+* `class_general.py`: This file contains the code to take raw data and convert it into a dataset that can be used as input to the probing models. Important steps in this script include creating the embeddings and converting the data to a PyTorch dataset.
+
+* `probes_general.py`: This file defines the neural network for our simple probe.
+
+* `train_simple_general.py`: This file contains the code to train and evaluate the classical probe.
+
+* `train_mdl_general.py`: This file contains the code to train and evaluate the MDL probe.
+
+* `main_{dataset}.py`: This file combines the above files to create an entire experimental pipeline that creates embeddings, conducts probing (final layer and layer-by-layer), and saves the results.
+
+* `plot_graphs.py`: This file contains the code to create the graphs that were featured in the project writeup.
+
 ### Getting Started
 
 1. Install the necessary packages using:
