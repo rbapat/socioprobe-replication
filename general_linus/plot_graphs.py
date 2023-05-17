@@ -224,18 +224,18 @@ if __name__ == "__main__":
     mdgender_scores = pd.read_csv("scores/mdgender_scores.csv", index_col=0)
     joc_electra_scores = pd.read_csv("scores/google_electra-base-discriminator_results.csv", index_col=0)
     joc_deberta_scores = pd.read_csv("scores/microsoft_deberta-base_results.csv", index_col=0)
+    joc_roberta_scores = pd.read_csv("scores/roberta-base_results.csv", index_col=0)
 
     # Join dfs and find means and averages for each row
     # TODO: UPDATE LIST
     df_joined = pd.concat([cola_scores, nps_scores, mdgender_scores, joc_electra_scores,
-                           joc_deberta_scores], ignore_index=True)
+                           joc_deberta_scores, joc_roberta_scores], ignore_index=True)
     df_joined["mean"] = df_joined[["run1", "run2", "run3", "run4", "run5"]].mean(axis=1)
     df_joined["std_dev"] = df_joined[["run1", "run2", "run3", "run4", "run5"]].std(axis=1)
 
     # ~ RQ1: Final layer embeddings
     for metric in ["F1", "MDL"]:
         plot_final_layer(df_joined, metric)
-
 
     # ~ RQ2: Graphs for each dataset
     for data_name in df_joined["data_name"].unique():
