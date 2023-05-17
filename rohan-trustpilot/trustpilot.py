@@ -115,6 +115,7 @@ def get_model(
     tokenizer = trfm.AutoTokenizer.from_pretrained(model_type)
     model = trfm.AutoModel.from_pretrained(model_type, config=model_config)
 
+    # print(f"{model_type} has {model_config.num_hidden_layers} hidden layers")
     return tokenizer, model.to(device), model_config
 
 

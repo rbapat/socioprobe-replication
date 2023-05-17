@@ -31,7 +31,7 @@ def run_epoch(
     Returns:
         Tuple[float, float]: loss and f1 score over entire epoch
     """
-    running_loss = 0
+    running_loss, running_codelength = 0, 0
     running_preds, running_gt = [], []
 
     orig_dataset = dataloader.dataset
@@ -46,10 +46,12 @@ def run_epoch(
             loss.backward()
             optimizer.step()
 
-        preds = torch.argmax(F.softmax(raw_output, dim=1), dim=1)
-        for pred, actual in zip(preds, ground_truth):
+        probs = F.softmax(raw_output, dim=1)
+        preds = torch.argmax(probs, dim=1)
+        for pred, prob, actual in zip(preds, probs, ground_truth):
             running_preds.append(pred.item())
             running_gt.append(actual.item())
+            running_codelength += torch.log2(prob[actual])
 
         # if not is_train:
         #     for batch_idx in torch.where(preds != ground_truth)[0]:
@@ -60,8 +62,10 @@ def run_epoch(
 
         running_loss += loss.item() * embeds.shape[0]
 
-    return running_loss / len(running_preds), metrics.f1_score(
-        running_gt, running_preds
+    return (
+        running_loss / len(running_preds),
+        metrics.f1_score(running_gt, running_preds),
+        running_codelength,
     )
 
 
@@ -126,7 +130,7 @@ def train_probe(
     lr_factor: float = 0.5,
     es_patience: int = 5,
     verbose=True,
-) -> Tuple[float, float]:
+) -> Tuple[float, float, float]:
     """Trains a simple probe to predict either age or gender from the dataset
 
     Args:
@@ -142,7 +146,7 @@ def train_probe(
         verbose (bool, optional): If true, will print out training info. Defaults to true.
 
     Returns:
-        Tuple[float, float]: the test loss and f1 score
+        Tuple[float, float, float]: the test loss and f1 score
     """
 
     probe = SimpleProbe(hidden_dim).to(device)
@@ -157,10 +161,12 @@ def train_probe(
 
     epoch = 0
     while no_improvement < es_patience:
-        train_loss, train_f1 = run_epoch(
+        train_loss, train_f1, _ = run_epoch(
             probe, optimizer, loss_function, train_loader, True
         )
-        val_loss, val_f1 = run_epoch(probe, optimizer, loss_function, val_loader, False)
+        val_loss, val_f1, _ = run_epoch(
+            probe, optimizer, loss_function, val_loader, False
+        )
 
         if val_loss < best_loss:
             best_loss = val_loss
@@ -176,9 +182,11 @@ def train_probe(
                 f"[{datetime.now().strftime('%H:%M:%S')}] Epoch {epoch}: train_loss[{train_loss:.4f}], train_f1[{train_f1:.4f}], val_loss[{val_loss:.4f}], val_f1[{val_f1:.4}]"
             )
 
-    test_loss, test_f1 = run_epoch(probe, optimizer, loss_function, test_loader, False)
+    test_loss, test_f1, codelength = run_epoch(
+        probe, optimizer, loss_function, test_loader, False
+    )
     if verbose:
         print(f"Training completed after {epoch} epochs")
         print(f"Test loss: {test_loss:.4f}, test f1: {test_f1:.4f}")
 
-    return test_loss, test_f1
+    return test_loss, test_f1, codelength

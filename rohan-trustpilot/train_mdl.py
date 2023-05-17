@@ -39,7 +39,7 @@ def train_probe(
     partitions = [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.25, 12.5, 25, 50, 100]
     partitions = [p / 100 for p in partitions]
 
-    mdl_length = (partitions[0] * len(dataset)) * np.log(2)
+    mdl_length = partitions[0] * len(dataset)  # * np.log(2)
 
     for i in range(len(partitions) - 1):
         train, test = partitions[i], partitions[i + 1] - partitions[i]
@@ -49,7 +49,7 @@ def train_probe(
             dataset, splits=splits, indices=mdl_idxs
         )
 
-        test_loss, test_f1 = simple.train_probe(
+        test_loss, test_f1, codelength = simple.train_probe(
             train_loader,
             val_loader,
             test_loader,
@@ -58,6 +58,6 @@ def train_probe(
             **kwargs
         )
 
-        mdl_length -= test_loss
+        mdl_length -= codelength
 
     return mdl_length
