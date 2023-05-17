@@ -45,5 +45,8 @@ python3 general_linus/main_{dataset}.py
 
 The `general_linus/main_{dataset}.py` script contains all of the necessary code to create embeddings, build, train, and evaluate probes, and create plots of the results. 
 
+To access the data needed to run the pipeline, please request access at this [link](https://drive.google.com/drive/folders/1vThMmT9aujE_tQGPn685fHhr7K92OQJG?usp=share_link).
+
 ### Additional Functionality
 - This repository also contains a Jupyter Notebook that allows you to make requests to the OpenAI API to determine if GPT-3 and ChatGPT are able to reason about sociodemographic variables, such as `age` and `gender`.
+
