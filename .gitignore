@@ -1,0 +1,12 @@
+.DS_Store
+code/.ipynb_checkpoints
+code/__pycache__
+venv
+.vscode
+output/*
+*.png
+*.csv
+*.pt
+*.tsv
+*.pyc
+*__pycache__*
